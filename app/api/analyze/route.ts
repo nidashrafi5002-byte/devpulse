@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import User from "@/lib/models/User";
-import dns from "dns";
-dns.setDefaultResultOrder("ipv4first");
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,7 +24,7 @@ export async function POST(req: NextRequest) {
 
     // Call Gemini AI
     const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
