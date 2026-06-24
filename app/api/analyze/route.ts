@@ -49,13 +49,24 @@ ${repoSummary}`
     const geminiData = await geminiRes.json();
     console.log("GEMINI RESPONSE:", JSON.stringify(geminiData));
 
-    if (!geminiRes.ok || !geminiData.candidates?.[0]?.content?.parts?.[0]?.text) {
-      console.error("Gemini error:", geminiData);
-      return NextResponse.json({ error: "Gemini API error", details: geminiData }, { status: 500 });
+    if (!geminiData.candidates) {
+      return NextResponse.json({ error: "Gemini API error" }, { status: 500 });
     }
+
     const aiText = geminiData.candidates[0].content.parts[0].text;
     const clean = aiText.replace(/```json|```/g, "").trim();
     const analysis = JSON.parse(clean);
+
+    // Build repos with CORRECT html_url
+    const cleanRepos = repos.slice(0, 10).map((r: any) => ({
+      name: r.name,
+      description: r.description || "",
+      language: r.language || "",
+      stars: r.stargazers_count || 0,
+      url: r.html_url, // ← correct GitHub page URL
+    }));
+
+    console.log("Sample repo URL:", cleanRepos[0]?.url);
 
     // Save to MongoDB
     await connectDB();
@@ -66,13 +77,7 @@ ${repoSummary}`
         skills: analysis.skills,
         summary: analysis.summary,
         topLanguages: analysis.topLanguages,
-        repos: repos.slice(0, 10).map((r: any) => ({
-          name: r.name,
-          description: r.description,
-          language: r.language,
-          stars: r.stargazers_count,
-          url: r.html_url,
-        })),
+        repos: cleanRepos,
         updatedAt: new Date(),
       },
       { upsert: true, new: true }
@@ -81,7 +86,7 @@ ${repoSummary}`
     return NextResponse.json({
       success: true,
       analysis,
-      repos: repos.slice(0, 10),
+      repos: cleanRepos,
     });
 
   } catch (error) {
