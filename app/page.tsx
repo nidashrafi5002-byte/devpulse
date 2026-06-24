@@ -65,7 +65,7 @@ export default function Home() {
           />
           <span className="text-gray-300">{session.user?.name}</span>
           <button
-            onClick={() => signOut()}
+            onClick={() => signOut({ callbackUrl: "/" })}
             className="text-gray-500 hover:text-white transition"
           >
             <LogOut className="w-5 h-5" />
