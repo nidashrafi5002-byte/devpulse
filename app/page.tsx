@@ -10,14 +10,17 @@ export default function Home() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
 
-  const analyze = async () => {
+  const [searchUsername, setSearchUsername] = useState("");
+
+  const analyze = async (targetUsername?: string) => {
     setLoading(true);
     setError("");
+    const username = targetUsername || session?.user?.username;
     try {
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: session?.user?.username }),
+        body: JSON.stringify({ username }),
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
@@ -121,6 +124,25 @@ export default function Home() {
               </p>
             </div>
 
+            {/* Search any GitHub user */}
+            <div className="flex gap-3 max-w-md mx-auto">
+              <input
+                type="text"
+                placeholder="Search any GitHub username..."
+                value={searchUsername}
+                onChange={(e) => setSearchUsername(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && analyze(searchUsername || undefined)}
+                className="flex-1 bg-gray-800 border border-gray-700 rounded-full px-5 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400"
+              />
+              <button
+                onClick={() => analyze(searchUsername || undefined)}
+                disabled={loading}
+                className="bg-gray-700 text-white px-5 py-3 rounded-full hover:bg-gray-600 transition"
+              >
+                Search
+              </button>
+            </div>
+
             {error && (
               <div className="bg-red-900/30 border border-red-500 rounded-xl p-4">
                 <p className="text-red-400">{error}</p>
@@ -128,7 +150,7 @@ export default function Home() {
             )}
 
             <button
-              onClick={analyze}
+              onClick={() => analyze()}
               disabled={loading}
               className="flex items-center gap-3 bg-yellow-400 text-black px-10 py-4 rounded-full font-bold text-lg hover:bg-yellow-300 transition-all duration-300 mx-auto disabled:opacity-50 shadow-lg hover:shadow-yellow-400/30"
             >
