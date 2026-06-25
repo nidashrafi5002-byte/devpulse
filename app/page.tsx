@@ -1,13 +1,14 @@
 "use client";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useState } from "react";
-import { GitBranch, Loader2, LogOut, Zap } from "lucide-react";
+import { GitBranch, Loader2, LogOut, Zap, Star, Copy, Check, Briefcase } from "lucide-react";
 
 export default function Home() {
   const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
   const [portfolioData, setPortfolioData] = useState<any>(null);
   const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
 
   const analyze = async () => {
     setLoading(true);
@@ -27,24 +28,62 @@ export default function Home() {
     setLoading(false);
   };
 
+  const copyLink = () => {
+    navigator.clipboard.writeText(`${window.location.origin}/u/${session?.user?.username}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const jobMatches = [
+    { title: "Frontend Developer", company: "Startup Inc", match: 92, type: "Remote" },
+    { title: "Full Stack Engineer", company: "Tech Corp", match: 87, type: "Hybrid" },
+    { title: "AI/ML Engineer", company: "AI Labs", match: 81, type: "Remote" },
+  ];
+
   if (!session) {
     return (
-      <main className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center space-y-6">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Zap className="text-yellow-400 w-8 h-8" />
-            <h1 className="text-4xl font-bold">DevPulse</h1>
+      <main className="min-h-screen bg-black text-white">
+        {/* Hero Section */}
+        <div className="flex flex-col items-center justify-center min-h-screen px-4 text-center">
+          <div className="mb-8">
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="bg-yellow-400 p-3 rounded-2xl">
+                <Zap className="w-8 h-8 text-black" />
+              </div>
+              <h1 className="text-5xl font-black text-white">DevPulse</h1>
+            </div>
+            <p className="text-xl text-gray-400 max-w-lg mx-auto mb-4">
+              Turn your GitHub into a stunning AI-powered portfolio in seconds
+            </p>
+            <div className="flex items-center justify-center gap-6 text-sm text-gray-500 mb-10">
+              <span>✨ AI Skill Analysis</span>
+              <span>📊 GitHub Stats</span>
+              <span>💼 Job Matches</span>
+            </div>
           </div>
-          <p className="text-gray-400 text-lg max-w-md">
-            Connect your GitHub and get an AI-powered portfolio with skill analysis in seconds.
-          </p>
+
           <button
             onClick={() => signIn("github")}
-            className="flex items-center gap-2 bg-white text-black px-8 py-3 rounded-full font-semibold text-lg hover:bg-gray-200 transition mx-auto"
+            className="flex items-center gap-3 bg-white text-black px-10 py-4 rounded-full font-bold text-lg hover:bg-yellow-400 transition-all duration-300 shadow-lg hover:shadow-yellow-400/30"
           >
             <GitBranch className="w-5 h-5" />
             Sign in with GitHub
           </button>
+
+          {/* Feature Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-16 max-w-3xl w-full">
+            {[
+              { icon: "🤖", title: "AI Analysis", desc: "Groq AI analyzes your repos and generates skill scores" },
+              { icon: "📊", title: "GitHub Stats", desc: "See your top languages, stars, and project highlights" },
+              { icon: "💼", title: "Job Matches", desc: "Get matched with jobs that fit your skill profile" },
+            ].map((f) => (
+              <div key={f.title} className="bg-gray-900 rounded-2xl p-6 text-left border border-gray-800">
+                <div className="text-3xl mb-3">{f.icon}</div>
+                <h3 className="font-bold text-white mb-2">{f.title}</h3>
+                <p className="text-gray-400 text-sm">{f.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </main>
     );
@@ -52,22 +91,18 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gray-950 text-white">
-      <div className="flex items-center justify-between px-8 py-4 border-b border-gray-800">
+      {/* Header */}
+      <div className="flex items-center justify-between px-8 py-4 border-b border-gray-800 sticky top-0 bg-gray-950/90 backdrop-blur-sm z-10">
         <div className="flex items-center gap-2">
-          <Zap className="text-yellow-400 w-6 h-6" />
-          <span className="text-xl font-bold">DevPulse</span>
+          <div className="bg-yellow-400 p-1.5 rounded-lg">
+            <Zap className="text-black w-4 h-4" />
+          </div>
+          <span className="text-xl font-black">DevPulse</span>
         </div>
         <div className="flex items-center gap-4">
-          <img
-            src={session.user?.image!}
-            className="w-8 h-8 rounded-full"
-            alt="avatar"
-          />
-          <span className="text-gray-300">{session.user?.name}</span>
-          <button
-            onClick={() => signOut({ callbackUrl: "/" })}
-            className="text-gray-500 hover:text-white transition"
-          >
+          <img src={session.user?.image!} className="w-8 h-8 rounded-full border-2 border-yellow-400" alt="avatar" />
+          <span className="text-gray-300 hidden md:block">{session.user?.name}</span>
+          <button onClick={() => signOut({ callbackUrl: "/" })} className="text-gray-500 hover:text-white transition">
             <LogOut className="w-5 h-5" />
           </button>
         </div>
@@ -75,56 +110,84 @@ export default function Home() {
 
       <div className="max-w-4xl mx-auto px-8 py-12">
         {!portfolioData ? (
-          <div className="text-center space-y-6">
-            <h2 className="text-3xl font-bold">
-              Welcome, {session.user?.name}!
-            </h2>
-            <p className="text-gray-400">
-              Click below to analyze your GitHub and generate your AI portfolio
-            </p>
-            {error && <p className="text-red-400">{error}</p>}
+          <div className="text-center space-y-8">
+            {/* Profile Card */}
+            <div className="bg-gray-900 rounded-3xl p-8 border border-gray-800">
+              <img src={session.user?.image!} className="w-24 h-24 rounded-full border-4 border-yellow-400 mx-auto mb-4" alt="avatar" />
+              <h2 className="text-3xl font-black">{session.user?.name}</h2>
+              <p className="text-gray-400 mt-2">@{session.user?.username}</p>
+              <p className="text-gray-500 mt-4 max-w-md mx-auto">
+                Ready to generate your AI-powered portfolio? Click below to analyze your GitHub repositories.
+              </p>
+            </div>
+
+            {error && (
+              <div className="bg-red-900/30 border border-red-500 rounded-xl p-4">
+                <p className="text-red-400">{error}</p>
+              </div>
+            )}
+
             <button
               onClick={analyze}
               disabled={loading}
-              className="flex items-center gap-2 bg-yellow-400 text-black px-8 py-3 rounded-full font-semibold text-lg hover:bg-yellow-300 transition mx-auto disabled:opacity-50"
+              className="flex items-center gap-3 bg-yellow-400 text-black px-10 py-4 rounded-full font-bold text-lg hover:bg-yellow-300 transition-all duration-300 mx-auto disabled:opacity-50 shadow-lg hover:shadow-yellow-400/30"
             >
-              {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Zap className="w-5 h-5" />
-              )}
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
               {loading ? "Analyzing your GitHub..." : "Generate My Portfolio"}
             </button>
           </div>
         ) : (
-          <div className="space-y-10">
-            <div className="bg-gray-900 rounded-2xl p-6 space-y-2">
-              <h2 className="text-2xl font-bold">{session.user?.name}</h2>
-              <p className="text-gray-400">{portfolioData.analysis.summary}</p>
-              <div className="flex gap-2 flex-wrap mt-3">
-                {portfolioData.analysis.topLanguages.map((lang: string) => (
-                  <span
-                    key={lang}
-                    className="bg-yellow-400 text-black text-xs font-semibold px-3 py-1 rounded-full"
-                  >
-                    {lang}
-                  </span>
-                ))}
+          <div className="space-y-8">
+            {/* Profile Hero */}
+            <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 border border-gray-700">
+              <div className="flex items-start gap-6">
+                <img
+                  src={session.user?.image!}
+                  className="w-20 h-20 rounded-2xl border-4 border-yellow-400"
+                  alt="avatar"
+                />
+                <div className="flex-1">
+                  <h2 className="text-2xl font-black">{session.user?.name}</h2>
+                  <p className="text-gray-400 mb-3">@{session.user?.username}</p>
+                  <p className="text-gray-300 text-sm leading-relaxed">{portfolioData.analysis.summary}</p>
+                  <div className="flex gap-2 flex-wrap mt-4">
+                    {portfolioData.analysis.topLanguages.map((lang: string) => (
+                      <span key={lang} className="bg-yellow-400 text-black text-xs font-bold px-3 py-1 rounded-full">
+                        {lang}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Share Portfolio */}
+              <div className="mt-6 flex items-center gap-3 bg-gray-800 rounded-xl p-3">
+                <span className="text-gray-400 text-sm flex-1 truncate">
+                  {typeof window !== "undefined" ? window.location.origin : ""}/u/{session.user?.username}
+                </span>
+                <button
+                  onClick={copyLink}
+                  className="flex items-center gap-2 bg-yellow-400 text-black px-4 py-2 rounded-lg text-sm font-bold hover:bg-yellow-300 transition"
+                >
+                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  {copied ? "Copied!" : "Copy Link"}
+                </button>
               </div>
             </div>
 
-            <div className="bg-gray-900 rounded-2xl p-6">
-              <h3 className="text-xl font-bold mb-4">Skills</h3>
-              <div className="space-y-3">
+            {/* Skills */}
+            <div className="bg-gray-900 rounded-3xl p-6 border border-gray-800">
+              <h3 className="text-xl font-black mb-6">Skills</h3>
+              <div className="space-y-4">
                 {portfolioData.analysis.skills.map((skill: any) => (
                   <div key={skill.name}>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>{skill.name}</span>
-                      <span className="text-gray-400">{skill.level}/100</span>
+                    <div className="flex justify-between text-sm mb-2">
+                      <span className="font-medium">{skill.name}</span>
+                      <span className="text-yellow-400 font-bold">{skill.level}/100</span>
                     </div>
-                    <div className="w-full bg-gray-800 rounded-full h-2">
+                    <div className="w-full bg-gray-800 rounded-full h-2.5">
                       <div
-                        className="bg-yellow-400 h-2 rounded-full transition-all"
+                        className="bg-gradient-to-r from-yellow-400 to-yellow-300 h-2.5 rounded-full transition-all"
                         style={{ width: `${skill.level}%` }}
                       />
                     </div>
@@ -133,35 +196,56 @@ export default function Home() {
               </div>
             </div>
 
-            <div>
-             <h3 className="text-xl font-bold mb-4">Top Repositories</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {portfolioData.repos.map((repo: any) => (
-                  <div
-                    key={repo.name}
-                    className="bg-gray-900 rounded-xl p-4 hover:bg-gray-800 transition space-y-2"
-                  >
-                    <div className="flex justify-between items-start">
-                      <span className="font-semibold">{repo.name}</span>
-                      <span className="text-yellow-400 text-sm">
-                        ⭐ {repo.stars}
+            {/* Job Matches */}
+            <div className="bg-gray-900 rounded-3xl p-6 border border-gray-800">
+              <div className="flex items-center gap-2 mb-6">
+                <Briefcase className="w-5 h-5 text-yellow-400" />
+                <h3 className="text-xl font-black">Job Matches</h3>
+              </div>
+              <div className="space-y-3">
+                {jobMatches.map((job) => (
+                  <div key={job.title} className="flex items-center justify-between bg-gray-800 rounded-2xl p-4">
+                    <div>
+                      <p className="font-bold">{job.title}</p>
+                      <p className="text-gray-400 text-sm">{job.company} · {job.type}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="bg-yellow-400 text-black text-xs font-black px-3 py-1 rounded-full">
+                        {job.match}% match
                       </span>
                     </div>
-                    <p className="text-gray-400 text-sm">
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Repos */}
+            <div>
+              <h3 className="text-xl font-black mb-4">Top Repositories</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {portfolioData.repos.map((repo: any) => (
+                  <div key={repo.name} className="bg-gray-900 rounded-2xl p-5 border border-gray-800 hover:border-yellow-400/50 transition-all">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="font-bold text-white">{repo.name}</span>
+                      <div className="flex items-center gap-1 text-yellow-400 text-sm">
+                        <Star className="w-3 h-3" />
+                        <span>{repo.stars}</span>
+                      </div>
+                    </div>
+                    <p className="text-gray-400 text-sm mb-4">
                       {repo.description || "No description"}
                     </p>
                     <div className="flex items-center justify-between">
                       {repo.language && (
-                        <span className="text-xs bg-gray-800 px-2 py-1 rounded-full text-gray-300">
+                        <span className="text-xs bg-gray-800 border border-gray-700 px-2 py-1 rounded-full text-gray-300">
                           {repo.language}
                         </span>
                       )}
-                      
                       <a
                         href={repo.url}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-yellow-400 text-xs hover:underline"
+                        className="text-yellow-400 text-xs font-bold hover:underline ml-auto"
                       >
                         View on GitHub &#8594;
                       </a>
@@ -173,7 +257,7 @@ export default function Home() {
 
             <button
               onClick={() => setPortfolioData(null)}
-              className="text-gray-500 underline text-sm"
+              className="text-gray-500 hover:text-gray-300 underline text-sm transition"
             >
               Regenerate Portfolio
             </button>
