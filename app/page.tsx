@@ -11,11 +11,13 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
 
   const [searchUsername, setSearchUsername] = useState("");
+  const [activeUsername, setActiveUsername] = useState("");
 
   const analyze = async (targetUsername?: string) => {
     setLoading(true);
     setError("");
     const username = targetUsername || session?.user?.username;
+    setActiveUsername(username || "");
     try {
       const res = await fetch("/api/analyze", {
         method: "POST",
@@ -164,13 +166,17 @@ export default function Home() {
             <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 border border-gray-700">
               <div className="flex items-start gap-6">
                 <img
-                  src={session.user?.image!}
+                  src={activeUsername === session?.user?.username 
+                    ? session.user?.image! 
+                    : `https://github.com/${activeUsername}.png`}
                   className="w-20 h-20 rounded-2xl border-4 border-yellow-400"
                   alt="avatar"
                 />
                 <div className="flex-1">
-                  <h2 className="text-2xl font-black">{session.user?.name}</h2>
-                  <p className="text-gray-400 mb-3">@{session.user?.username}</p>
+                  <h2 className="text-2xl font-black">
+                    {activeUsername === session?.user?.username ? session.user?.name : activeUsername}
+                  </h2>
+                  <p className="text-gray-400 mb-3">@{activeUsername}</p>
                   <p className="text-gray-300 text-sm leading-relaxed">{portfolioData.analysis.summary}</p>
                   <div className="flex gap-2 flex-wrap mt-4">
                     {portfolioData.analysis.topLanguages.map((lang: string) => (
