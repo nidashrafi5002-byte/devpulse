@@ -34,7 +34,7 @@ export default function Home() {
   };
 
   const copyLink = () => {
-    navigator.clipboard.writeText(`${window.location.origin}/u/${session?.user?.username}`);
+    navigator.clipboard.writeText(`${window.location.origin}/u/${activeUsername}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -191,7 +191,7 @@ export default function Home() {
               {/* Share Portfolio */}
               <div className="mt-6 flex items-center gap-3 bg-gray-800 rounded-xl p-3">
                 <span className="text-gray-400 text-sm flex-1 truncate">
-                  {typeof window !== "undefined" ? window.location.origin : ""}/u/{session.user?.username}
+                {typeof window !== "undefined" ? window.location.origin : ""}/u/{activeUsername}
                 </span>
                 <button
                   onClick={copyLink}
