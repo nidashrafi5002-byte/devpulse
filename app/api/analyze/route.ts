@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import User from "@/lib/models/User";
+import { getJobMatches } from "@/app/lib/jobMatches";
 
 export async function POST(req: NextRequest) {
   try {
@@ -61,6 +62,8 @@ ${repoSummary}`
       url: r.html_url,
     }));
 
+    const jobMatches = getJobMatches(analysis.skills);
+
     await connectDB();
     await User.findOneAndUpdate(
       { username },
@@ -69,6 +72,7 @@ ${repoSummary}`
         skills: analysis.skills,
         summary: analysis.summary,
         topLanguages: analysis.topLanguages,
+        jobMatches,
         repos: cleanRepos,
         updatedAt: new Date(),
       },
@@ -78,6 +82,7 @@ ${repoSummary}`
     return NextResponse.json({
       success: true,
       analysis,
+      jobMatches,
       repos: cleanRepos,
     });
 

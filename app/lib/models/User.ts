@@ -7,6 +7,7 @@ const UserSchema = new mongoose.Schema({
   summary: { type: String },
   skills: [{ name: String, level: Number }],
   topLanguages: [String],
+  jobMatches: [{ title: String, company: String, type: String, match: Number }],
   repos: [
     {
       name: String,
