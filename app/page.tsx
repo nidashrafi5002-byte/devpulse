@@ -2,6 +2,7 @@
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useState } from "react";
 import { GitBranch, Loader2, LogOut, Zap, Star, Copy, Check, Briefcase } from "lucide-react";
+import { getJobMatches } from "@/app/lib/jobMatches";
 
 export default function Home() {
   const { data: session } = useSession();
@@ -39,35 +40,6 @@ export default function Home() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const getJobMatches = (skills: any[]) => {
-    if (!skills || skills.length === 0) return [];
-    
-    const allJobs = [
-      { title: "Frontend Developer", keywords: ["react", "javascript", "typescript", "css", "html", "vue", "angular"], company: "Startup Inc", type: "Remote" },
-      { title: "Full Stack Engineer", keywords: ["node", "javascript", "typescript", "react", "python", "mongodb"], company: "Tech Corp", type: "Hybrid" },
-      { title: "AI/ML Engineer", keywords: ["python", "machine learning", "tensorflow", "pytorch", "ai", "data"], company: "AI Labs", type: "Remote" },
-      { title: "Backend Developer", keywords: ["python", "java", "node", "go", "rust", "c++", "api"], company: "Scale AI", type: "Remote" },
-      { title: "DevOps Engineer", keywords: ["docker", "kubernetes", "aws", "linux", "bash", "ci/cd"], company: "Cloud Corp", type: "Hybrid" },
-      { title: "Systems Engineer", keywords: ["c", "c++", "rust", "linux", "embedded", "assembly"], company: "Intel Labs", type: "Onsite" },
-      { title: "Data Engineer", keywords: ["python", "sql", "spark", "hadoop", "data", "etl"], company: "DataFlow", type: "Remote" },
-      { title: "Mobile Developer", keywords: ["swift", "kotlin", "react native", "flutter", "android", "ios"], company: "AppStudio", type: "Remote" },
-    ];
-
-    const skillNames = skills.map((s: any) => s.name.toLowerCase());
-    
-    const scored = allJobs.map(job => {
-      const matches = job.keywords.filter(k => 
-        skillNames.some(s => s.includes(k) || k.includes(s))
-      );
-      const match = Math.min(95, 60 + (matches.length * 10) + Math.floor(Math.random() * 5));
-      return { ...job, match };
-    });
-
-    return scored
-      .filter(j => j.match > 65)
-      .sort((a, b) => b.match - a.match)
-      .slice(0, 3);
-  };
 
   if (!session) {
     return (

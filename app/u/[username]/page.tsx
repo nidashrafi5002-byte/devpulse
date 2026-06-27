@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Zap, Star, Briefcase, GitBranch } from "lucide-react";
+import { getJobMatches } from "@/app/lib/jobMatches";
 
 export default function PublicPortfolio() {
   const params = useParams();
@@ -9,12 +10,6 @@ export default function PublicPortfolio() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-
-  const jobMatches = [
-    { title: "Frontend Developer", company: "Startup Inc", match: 92, type: "Remote" },
-    { title: "Full Stack Engineer", company: "Tech Corp", match: 87, type: "Hybrid" },
-    { title: "AI/ML Engineer", company: "AI Labs", match: 81, type: "Remote" },
-  ];
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -131,7 +126,7 @@ export default function PublicPortfolio() {
             <h2 className="text-xl font-black">Job Matches</h2>
           </div>
           <div className="space-y-3">
-            {jobMatches.map((job) => (
+            {getJobMatches(data?.skills).map((job) => (
               <div key={job.title} className="flex items-center justify-between bg-gray-800 rounded-2xl p-4">
                 <div>
                   <p className="font-bold">{job.title}</p>
