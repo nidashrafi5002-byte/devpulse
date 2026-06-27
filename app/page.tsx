@@ -227,7 +227,7 @@ export default function Home() {
                 <h3 className="text-xl font-black">Job Matches</h3>
               </div>
               <div className="space-y-3">
-                {(portfolioData?.jobMatches || getJobMatches(portfolioData?.analysis?.skills)).map((job: any) => (
+                {getJobMatches(portfolioData?.analysis?.skills).map((job: any) => (
                   <div key={job.title} className="flex items-center justify-between bg-gray-800 rounded-2xl p-4">
                     <div>
                       <p className="font-bold">{job.title}</p>

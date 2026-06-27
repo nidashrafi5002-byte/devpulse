@@ -126,7 +126,7 @@ export default function PublicPortfolio() {
             <h2 className="text-xl font-black">Job Matches</h2>
           </div>
           <div className="space-y-3">
-            {(data?.jobMatches || getJobMatches(data?.skills)).map((job: any) => (
+            {getJobMatches(data?.skills).map((job: any) => (
               <div key={job.title} className="flex items-center justify-between bg-gray-800 rounded-2xl p-4">
                 <div>
                   <p className="font-bold">{job.title}</p>
